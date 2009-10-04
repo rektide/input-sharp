@@ -12,6 +12,8 @@ public enum IocAccessMode:
 	Read = 2
 	RW = 3
 
+
+[StructLayout(LayoutKind.Explicit, Size: 4)]
 struct IoCtlStruct:
 	[FieldOffset(0)] [Property(Command)] command as byte
 	[FieldOffset(1)] [Property(Type)] type as byte
@@ -37,7 +39,6 @@ struct IoCtlStruct:
 			size = size & 0xC000 | value & 0x3FFF
 
 
-[StructLayout(LayoutKind.Explicit, Size: 4)]
 class IoCtl[of T]:
 	
 	# integral ioctl data structure structure
@@ -53,34 +54,35 @@ class IoCtl[of T]:
 	# read/write may have different commands
 	[Property(WriteCommand)] writeCommand as byte = 0
 
-	[DllImport("libc.so", EntryPoint: "ioctl")] 
-	protected static def IoCtlNone([In] fd as int, [In] command as int, [In] obj as T):
+	#[DllImport("libc.so", EntryPoint: "ioctl")] 
+	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
+	protected static def IoCtlNone(fd as int, command as IoCtlStruct, [In] ref obj as T):
 		pass
 	
-	[DllImport("libc.so", EntryPoint: "ioctl")] 
-	protected static def IoCtlRead([In] fd as int, [In] command as int, [Out] obj as T):
+	#[DllImport("libc.so", EntryPoint: "ioctl")] 
+	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
+	protected static def IoCtlRead(fd as int, command as IoCtlStruct, [Out] ref obj as T):
 		pass
 
-	[DllImport("libc.so", EntryPoint: "ioctl")] 
-	protected static def IoCtlWrite([In] fd as int, [In] command as int, [In] obj as T):
+	#[DllImport("libc.so", EntryPoint: "ioctl")] 
+	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
+	protected static def IoCtlWrite(fd as int, command as IoCtlStruct, [In] ref obj as T):
 		pass
 	
-	[DllImport("libc.so", EntryPoint: "ioctl")] 
-	protected static def IoCtlBoth([In] fd as int, command as int, [In,Out] obj as T):
+	#[DllImport("libc.so", EntryPoint: "ioctl")]
+	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
+	protected static def IoCtlBoth(fd as int, command as IoCtlStruct, [In,Out] ref obj as T):
 		pass
 	
 	def constructor():
-		pass
+		Size = Marshal.SizeOf(T)
 	
 	def constructor(size as ushort):
 		Size = size
 	
 	def constructor(command as byte, type as byte, accessMode as IocAccessMode):
+		super()
 		Size = 0
-		try:
-			Size = Marshal.SizeOf(T)
-		except:
-			pass
 		self(command,type,Size,accessMode)
 
 	def constructor(command as byte, type as byte, size as ushort, accessMode as IocAccessMode):
@@ -95,18 +97,21 @@ class IoCtl[of T]:
 		if mode == IocAccessMode.RW:
 			if singleAccess == true:
 				# default to ro
-				IoCtlRead(handle, Command, obj)
+				IoCtlRead(handle, underlying, obj)
 			else:
-				IoCtlBoth(handle, Command, obj)
-		if mode == IocAccessMode.Read:
-			IoCtlRead(handle, Command, obj)
+				IoCtlBoth(handle, underlying, obj)
+		elif mode == IocAccessMode.Read:
+			IoCtlRead(handle, underlying, obj)
 		elif mode == IocAccessMode.Write:
 			if writeCommand == 0:
-				IoCtlWrite(handle, Command, obj)
+				IoCtlWrite(handle, underlying, obj)
 			else:
-				IoCtlWrite(handle, writeCommand, obj)
+				buf = Command
+				Command = writeCommand
+				IoCtlWrite(handle, underlying, obj)
+				Command = buf
 		elif mode == IocAccessMode.None:
-			IoCtlNone(handle, Command, obj)
+			IoCtlNone(handle, underlying, obj)
 		else:
 			raise ArgumentException("Invalid AccessMode")
 

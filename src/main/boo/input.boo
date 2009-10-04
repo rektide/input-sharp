@@ -25,9 +25,9 @@ abstract class BaseBufferedIoCtl ( IoCtl[of BufferK] ):
 abstract class BaseInputIoCtl[of T] ( IoCtl[of T] ):
 	
 	def constructor():
-		Command = "E".GetAsciiBytes()[0]
+		Type = "E".GetAsciiBytes()[0]
 		AccessMode = IocAccessMode.Read
-
+	
 
 
 # IoCtl implementations
