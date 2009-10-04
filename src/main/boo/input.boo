@@ -19,15 +19,20 @@ struct DualInt:
 
 # base Input IoCtl
 
-abstract class BaseBufferedIoCtl ( IoCtl[of BufferK] ):
-	pass
-
 abstract class BaseInputIoCtl[of T] ( IoCtl[of T] ):
 	
 	def constructor():
 		Type = "E".GetAsciiBytes()[0]
 		AccessMode = IocAccessMode.Read
-	
+
+
+abstract class BaseBufferedIoCtl ( BaseInputIoCtl[of BufferK] ):
+	pass
+
+abstract class BaseStringIoCtl ( BaseInputIoCtl[of StringBufferK] ) :
+	pass
+		
+
 
 
 # IoCtl implementations
@@ -58,51 +63,51 @@ class KeycodeIoCtl ( BaseInputIoCtl[of DualInt] ):
 		Command = 0x04
 		AccessMode = IocAccessMode.RW
 
-class NameIoCtl ( BaseInputIoCtl[of StringBufferK] ):
+class NameIoCtl ( BaseStringIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x06
 
-class PhysIoCtl ( BaseInputIoCtl[of StringBufferK] ):
+class PhysIoCtl ( BaseStringIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x07
 
-class UniqIoCtl ( BaseInputIoCtl[of StringBufferK] ):
+class UniqIoCtl ( BaseStringIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x08
 
-class KeyIoCtl ( BaseInputIoCtl[of BufferTFS] ):
+class KeyIoCtl ( BaseBufferedIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x18
 
-class LedIoCtl ( BaseInputIoCtl[of BufferTFS] ):
+class LedIoCtl ( BaseBufferedIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x19
 
 
-class SndIoCtl ( BaseInputIoCtl[of BufferTFS] ):
+class SndIoCtl ( BaseBufferedIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x1a
 
 
-class SwIoCtl ( BaseInputIoCtl[of BufferTFS] ):
+class SwIoCtl ( BaseBufferedIoCtl ):
 	
 	def constructor():
 		super()
 		Command = 0x1b
 
-class BitIoCtl ( BaseInputIoCtl[of BufferTFS] ):
+class BitIoCtl ( BaseBufferedIoCtl ):
 	
 	def constructor(bit as int):
 		super()
