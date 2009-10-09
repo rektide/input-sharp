@@ -4,6 +4,8 @@ import System
 import System.Runtime.InteropServices
 
 import VoodooWarez.ExCathedra.ClassGen
+import VoodooWarez.ExCathedra.Collections
+import VoodooWarez.ExCathedra.Functional
 
 [Flags]
 public enum IocAccessMode:
@@ -39,16 +41,22 @@ struct IoCtlStruct:
 			size = size & 0xC000 | value & 0x3FFF
 
 
-class IoCtl[of T]:
+class IoCtlCollection:
+
+	[Property(TypeMap)]
+	static typeMap as MappedCollection[of Type,object]
+
+
+class IoCtl[of T] (IoCtlCollection):
 	
 	# integral ioctl data structure structure
 	underlying as IoCtlStruct
-	
+
 	ComposeProperties underlying, "", \
 		Command as byte, Type as byte, \
 		Size as ushort, FullCommand as ushort, \
 		AccessMode as IocAccessMode, ParameterSize as ushort
-	
+
 	# IoCtl's may be read or write but not both at once:
 	[Property(SingleAccess)] singleAccess = false
 	# read/write may have different commands
@@ -56,22 +64,22 @@ class IoCtl[of T]:
 
 	#[DllImport("libc.so", EntryPoint: "ioctl")] 
 	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
-	protected static def IoCtlNone(fd as int, command as IoCtlStruct, [In] ref obj as T):
+	protected def IoCtlNone(fd as int, command as IoCtlStruct, [In] ref obj as T):
 		pass
 	
 	#[DllImport("libc.so", EntryPoint: "ioctl")] 
 	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
-	protected static def IoCtlRead(fd as int, command as IoCtlStruct, [Out] ref obj as T):
+	protected def IoCtlRead(fd as int, command as IoCtlStruct, [Out] ref obj as T):
 		pass
 
 	#[DllImport("libc.so", EntryPoint: "ioctl")] 
 	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
-	protected static def IoCtlWrite(fd as int, command as IoCtlStruct, [In] ref obj as T):
+	protected def IoCtlWrite(fd as int, command as IoCtlStruct, [In] ref obj as T):
 		pass
 	
 	#[DllImport("libc.so", EntryPoint: "ioctl")]
 	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
-	protected static def IoCtlBoth(fd as int, command as IoCtlStruct, [In,Out] ref obj as T):
+	protected def IoCtlBoth(fd as int, command as IoCtlStruct, [In,Out] ref obj as T):
 		pass
 	
 	def constructor():
@@ -91,7 +99,7 @@ class IoCtl[of T]:
 		Size = size
 		AccessMode = accessMode
 	
-	def Run(handle as int, ref obj as T) as int:
+	def DoIoCtl(handle as int, ref obj as T ) as int:
 		raise ArgumentException("Invalid handle") if handle < 1
 		mode = AccessMode
 		if mode == IocAccessMode.RW:

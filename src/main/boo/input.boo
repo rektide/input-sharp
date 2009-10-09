@@ -1,6 +1,7 @@
 namespace VoodooWarez.Systems.Input
 
 import System
+import System.IO
 import System.Runtime.InteropServices
 
 import VoodooWarez.ExCathedra.Convert.Bytes
@@ -19,14 +20,47 @@ struct DualInt:
 
 # base Input IoCtl
 
-abstract class BaseInputIoCtl[of T] ( IoCtl[of T] ):
+abstract class BaseInputIoCtl[of T(constructor)] ( IoCtl[of T], IDisposable ):
 	
-	def constructor():
+	file as FileStream
+	handle as int
+
+	Handle as int:
+		get:
+			return handle
+		set:
+			handle = value
+
+	public def constructor():
 		Type = "E".GetAsciiBytes()[0]
 		AccessMode = IocAccessMode.Read
+		handle = -1
+	
+	public def constructor(handle as int):
+		self.handle = handle
 
+	public def constructor(fileStream as FileStream):
+		self.file = fileStream
+		self(fileStream.Handle.ToInt32())
+		
+	def constructor(fileName as string):
+		self.file = File.Open(fileName, FileMode.Open, FileAccess.Read)
+		self(file.Handle.ToInt32())
 
-abstract class BaseBufferedIoCtl ( BaseInputIoCtl[of BufferK] ):
+	def CreateIoCtlBuffer() as T:
+		# boo has not yet implemented
+		# return T()
+		return Activator.CreateInstance[of T]()
+		
+	def DoIoCtl(ref obj as T) as int:
+		raise Exception("Invalid handle ${Handle}") if self.Handle < 0
+		return DoIoCtl(self.Handle, obj)
+	
+	def Dispose():
+		file.Close() if file
+	
+	
+abstract class BaseBufferedIoCtl ( BaseInputIoCtl[of BufferTFS] ):
 	pass
 
 abstract class BaseStringIoCtl ( BaseInputIoCtl[of StringBufferK] ) :
