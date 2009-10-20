@@ -1,5 +1,7 @@
 namespace VoodooWarez.Systems.Input
 
+import C5
+
 import System
 import System.Runtime.InteropServices
 
@@ -42,15 +44,45 @@ struct IoCtlStruct:
 
 
 class IoCtlCollection:
-
-	[Property(TypeMap)]
+	
 	static typeMap as MappedCollection[of Type,object]
 
+	static Instance[type as Type]:
+		get:
+			obj = typeMap[type]
+			return obj if obj
+			obj = Activator.CreateInstance(type) 
+			typeMap[type] = obj
+			return obj
 
-class IoCtl[of T] (IoCtlCollection):
+	static def constructor():
+		mp = def(input as Type) as object:
+			m = Type.GetType("VoodooWarez.Systems.Input.IIoCtl`1")
+			found = false
+			for i in input.GetInterfaces():
+				if m == i:
+					found = true
+					break
+			raise Exception("Invalid type creation") if not found
+			return Activator.CreateInstance(input)
+		collection = ArrayList[of Type]()
+		typeMap = MappedCollection[of Type,object]()
+		# generics issue
+		#typeMap.Map = mp 
+		typeMap.Collection = collection
+
+
+
+interface IIoCtl[of T]:
+	def DoIoCtl(handle as int, ref obj as T ) as int:
+		pass
+
+
+
+class IoCtl[of T] (IoCtlCollection, IIoCtl[of T]):
 	
 	# integral ioctl data structure structure
-	underlying as IoCtlStruct
+	protected underlying as IoCtlStruct
 
 	ComposeProperties underlying, "", \
 		Command as byte, Type as byte, \
@@ -58,9 +90,9 @@ class IoCtl[of T] (IoCtlCollection):
 		AccessMode as IocAccessMode, ParameterSize as ushort
 
 	# IoCtl's may be read or write but not both at once:
-	[Property(SingleAccess)] singleAccess = false
+	[Property(SingleAccess)] protected singleAccess = false
 	# read/write may have different commands
-	[Property(WriteCommand)] writeCommand as byte = 0
+	[Property(WriteCommand)] protected writeCommand as byte = 0
 
 	#[DllImport("libc.so", EntryPoint: "ioctl")] 
 	[DllImport("libc.so", EntryPoint: "ioctl", CallingConvention: CallingConvention.Cdecl)] 
