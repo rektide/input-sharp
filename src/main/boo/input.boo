@@ -61,7 +61,7 @@ abstract class BaseInputIoCtl[of T(constructor)] ( IoCtl[of T], IDisposable ):
 	
 	
 abstract class BaseBufferedIoCtl ( BaseInputIoCtl[of BufferTFS] ):
-	pass
+	BaseBufferType = BufferTFS
 
 abstract class BaseStringIoCtl ( BaseInputIoCtl[of StringBufferK] ) :
 	pass
@@ -142,18 +142,36 @@ class SwIoCtl ( BaseBufferedIoCtl ):
 		Command = 0x1b
 
 class BitIoCtl ( BaseBufferedIoCtl ):
-	
+
+	def constructor():
+		self(0)
+		
 	def constructor(bit as int):
 		super()
 		Command = 0x20 + bit
+	
+	Bit as int:
+		get:
+			return Command - 0x20
+		set:
+			Command = 0x20 + value
 
 class AbsIoCtl ( BaseInputIoCtl[of InputAbsinfo] ):
-	
+
+	def constructor():
+		self(0)
+		
 	def constructor(abs as int):
 		super()
 		Command = 0x40 + abs
 		WriteCommand = 0xc0 + abs
 		AccessMode = IocAccessMode.RW
+	
+	Abs as int:
+		get:
+			return Command - 0x40
+		set:
+			Command = 0x40 + value
 
 # TODO: Must handle the union in the ff_effect structure!
 #class SffIoCtl ( BaseInputIoCtl[of FfEffect] ):
