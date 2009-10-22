@@ -49,9 +49,14 @@ class IoCtlCollection:
 
 	static Instance[type as Type]:
 		get:
-			obj = typeMap[type]
-			return obj if obj
+			# TODO: MappedCollection should do all the following automagically; just having issues.
+			try:
+				obj = typeMap[type]
+				return obj if obj
+			except ex:
+				pass
 			obj = Activator.CreateInstance(type) 
+			raise ArgumentException() if not obj
 			typeMap[type] = obj
 			return obj
 
