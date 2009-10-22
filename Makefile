@@ -19,7 +19,8 @@ main:
 
 
 test:
-	booc -r:target/${OUTFILE} -r:vimp -keyfile:${SNK} -o:target/test/name-device.exe src/test/testcases/*boo
+	booc -r:target/${OUTFILE} -r:vimp -keyfile:${SNK} -o:target/test/name-device-1.exe src/test/testcases/name-device-1.boo
+	booc -r:target/${OUTFILE} -r:vimp -keyfile:${SNK} -o:target/test/name-device-2.exe src/test/testcases/name-device-2.boo
 
 
 install: 
