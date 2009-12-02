@@ -8,7 +8,7 @@ import System
 import System.IO
 import System.Text
 
-import VoodooWarez.Systems.Import
+import VoodooWarez.Systems.Import.Helper
 
 
 
@@ -38,7 +38,7 @@ macro YieldClass:
 
 class InputDevice ( ):
 	
-	handle as int	
+	handle as int
 	file as string
 	fd as FileStream
 	
@@ -55,9 +55,7 @@ class InputDevice ( ):
 	
 	def constructor(fileHandle as int):
 		handle = fileHandle
-
 	
-		
 	# YieldMacro template, implementing VersionIoCtl
 	static _VersionIoCtl as VersionIoCtl
 	

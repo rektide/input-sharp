@@ -5,8 +5,7 @@ import System.IO
 import System.Runtime.InteropServices
 
 import VoodooWarez.ExCathedra.Convert.Bytes
-import VoodooWarez.Systems.Import
-
+import VoodooWarez.Systems.Import.Helper
 
 
 # data structures for ioctl's
@@ -41,7 +40,6 @@ abstract class BaseInputIoCtl[of T(constructor)] ( IoCtl[of T], IDisposable ):
 
 	public def constructor(fileStream as FileStream):
 		self.file = fileStream
-		self(fileStream.Handle.ToInt32())
 		
 	def constructor(fileName as string):
 		self.file = File.Open(fileName, FileMode.Open, FileAccess.Read)

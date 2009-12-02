@@ -57,7 +57,7 @@ class IoCtlCollection:
 				pass
 			obj = Activator.CreateInstance(type) 
 			raise ArgumentException() if not obj
-			typeMap[type] = obj
+			typeMap.Add(type,obj)
 			return obj
 
 	static def constructor():

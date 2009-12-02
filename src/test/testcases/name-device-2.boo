@@ -4,7 +4,7 @@ import System
 import System.IO
 
 import VoodooWarez.Systems.Input
-import VoodooWarez.Systems.Import
+import VoodooWarez.Systems.Import.Helper
 
 
 print "starting"
