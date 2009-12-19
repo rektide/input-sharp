@@ -38,6 +38,8 @@ macro YieldClass:
 
 class InputDevice ( ):
 	
+	# basic members
+	
 	handle as int
 	file as string
 	fd as FileStream
@@ -55,7 +57,9 @@ class InputDevice ( ):
 	
 	def constructor(fileHandle as int):
 		handle = fileHandle
-	
+
+	# IoCtl's
+		
 	# YieldMacro template, implementing VersionIoCtl
 	static _VersionIoCtl as VersionIoCtl
 	
@@ -82,4 +86,29 @@ class InputDevice ( ):
 	YieldClass  RmffIoCtl,  Int32
 	YieldClass  EffectsIoCtl,  Int32
 	YieldClass  GrabIoCtl,  Int32
+	
+	# realtime InputEvent reading
+	
+	protected inputReader as FileObjectStream
+	
+	isRunning as bool
+	IsReadingInputEvents:
+		get:
+			return isRunning
+		set:
+			return if value == isRunning
+			if value == false:
+				inputReader.Stop() if inputReader
+			else:
+				raise Exception("Must have an open FileStream to start") if not fd
+				if not inputReader:
+					inputReader = FileObjectStream(fd,InputEvent.GetSerializer())
+					inputReader.OnNewObjectInstantiation += InputEventCallback
+				inputReader.Start()
+			isRunning = value
+	
+	def InputEventCallback(sender, args as ObjectInstantiationEventArgs):
+		OnInputEvent(self,args.NewObject)
+	
+	event OnInputEvent as callable(object,InputEvent)
 	
