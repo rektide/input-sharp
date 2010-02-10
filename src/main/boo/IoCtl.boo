@@ -47,6 +47,8 @@ class IoCtlCollection:
 	
 	static typeMap as MappedCollection[of Type,object]
 
+	static iioctlType as Type = Type.GetType("VoodooWarez.Systems.Input.IIoCtl`1")
+
 	static Instance[type as Type]:
 		get:
 			# TODO: MappedCollection should do all the following automagically; just having issues.
@@ -55,6 +57,7 @@ class IoCtlCollection:
 				return obj if obj
 			except ex:
 				pass
+			# TODO: get MappedCollection mapping properly!
 			obj = Activator.CreateInstance(type) 
 			raise ArgumentException() if not obj
 			typeMap.Add(type,obj)
@@ -62,10 +65,9 @@ class IoCtlCollection:
 
 	static def constructor():
 		mp = def(input as Type) as object:
-			m = Type.GetType("VoodooWarez.Systems.Input.IIoCtl`1")
 			found = false
 			for i in input.GetInterfaces():
-				if m == i:
+				if iioctlType == i:
 					found = true
 					break
 			raise Exception("Invalid type creation") if not found
