@@ -12,8 +12,9 @@ BOOC_OPTS=-debug
 all: vimp main test
 
 vimp:
+	# DISABLE FOR INPV HAND-MANIPULATION
 	cd ${VIMP_DIR} && ${VIMP} "VoodooWarez.Systems.Input" ${VIMP_CODE} input.h
-	#booc -keyfile:${SNK} -o:target/${INPV_DLL} ${VIMP_DIR}${VIMP_CODE}
+	#
 	booc ${BOOC_OPTS} -keyfile:${SNK} -r:vimp.helper -o:target/${INPV_DLL} ${VIMP_DIR}${VIMP_CODE}
 
 main:
