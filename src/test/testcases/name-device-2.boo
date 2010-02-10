@@ -7,8 +7,6 @@ import VoodooWarez.Systems.Input
 import VoodooWarez.Systems.Import.Helper
 
 
-print "starting"
-
 id = InputDevice(argv[0])
 
 b= StringBufferK()

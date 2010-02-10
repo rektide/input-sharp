@@ -8,13 +8,14 @@ import VoodooWarez.Systems.Input
 import VoodooWarez.Systems.Import.Helper
 
 
-print "starting"
-
 def ReadEvent(sender,ie as InputEvent):
 	print "Event! ${ie.Code} ${ie.Value} ${ie.Type} ${ie.Time.TvSec} ${ie.Time.TvUsec}"
+
+raise ArgumentException("No input device specified.") if not argv.Length
 
 id = InputDevice(argv[0])
 id.OnInputEvent += ReadEvent
 id.IsReadingInputEvents = true
+print "async reading begins now"
 
 Thread.Sleep(8000)
